@@ -4,3 +4,7 @@
 ```bash
 docker-compose up --build -d
 ```
+#active debugger
+```bash
+docker exec -it ewano_wordpress_1 /bin/bash
+```
