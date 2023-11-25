@@ -32,7 +32,7 @@ class WC_Gateway_Ewano extends WC_Payment_Gateway {
                 'label'       => __('Enable Ewano Payment', 'woocommerce'),
                 'type'        => 'checkbox',
                 'description' => '',
-                'default'     => 'no'
+                'default'     => 'true'
             ),
             'title' => array(
                 'title'       => __('Title', 'woocommerce'),
@@ -115,20 +115,3 @@ class WC_Gateway_Ewano extends WC_Payment_Gateway {
         }
     }
 }
-
-function initialize_ewano_gateway() {
-    if ( ! class_exists( 'WC_Payment_Gateway' ) ) return;
-
-//    class WC_Gateway_Ewano extends WC_Payment_Gateway {
-//        // Your code goes here
-//    }
-
-    function add_ewano_gateway( $methods ) {
-        $methods[] = 'WC_Gateway_Ewano';
-        return $methods;
-    }
-
-    add_filter( 'woocommerce_payment_gateways', 'add_ewano_gateway' );
-}
-
-add_action( 'plugins_loaded', 'initialize_ewano_gateway', 11 );
