@@ -2,27 +2,30 @@
 include_once('EwanoAssist.php');
 
 class EwanoAuth {
-    public function __construct($username){
+    public function __construct($usre = null){
         $this->assist = new EwanoAssist();
-        $this->user = [
-            'username'=> '09358745928',
-            'password'=> '0000000000',
-            'first_name'=> 'Ali',
-            'last_name'=> 'Esmaeeli',
-        ];
-        $this->username = $username;
+        $this->user = $usre;
+        if (isset($this->user) && isset($this->user['mobile'])) {
+            $this->username = $this->user['mobile'];
+        } else {
+            $this->username = null;
+        }
     }
 
-    public function getCurrentUserId () {
-        return get_current_user_id();
+    public function isUserLoggedIn () {
+        $user = $this->getOrCreateUser();
+        if (is_wp_error($user) || empty($user)) {
+            return false;
+        }
+        return $user->ID === $this->getCurrentUserId();
     }
 
     public function login () {
-        $user = get_user_by('login', $this->username);
-        // Check if the user exists
-        if (!isset($user)) {
-            $this->registetr();
-            $user = get_user_by('login', $this->user['username']);
+        $user = $this->getOrCreateUser();
+
+        if (is_wp_error($user)) {
+            // Handle the WP_Error object, the user either could not be retrieved or created
+            return false;
         }
 
         // Setup WordPress user object
@@ -35,14 +38,56 @@ class EwanoAuth {
         do_action('wp_login', $user->user_login, $user);
     }
 
-    public function registetr () {
-        // Create a new user
-        $userId = wp_create_user($this->user['username'], $this->user['password']);
+    private function getCurrentUserId () {
+        return get_current_user_id();
+    }
 
-        // Set first and last names
-        update_user_meta($userId, 'first_name', $this->user['first_name']);
-        update_user_meta($userId, 'last_name', $this->user['last_name']);
+    private function register () {
+        $username = $this->user['mobile'] ?? false;
+        $password = $this->user['national_code'] ?? false;
+        $lName = $this->user['last_name'] ?? ' ';
+        $fName = $this->user['first_name'] ?? 'کاربر ایوانو';
+        $displayName = $fName . ' ' . (!$this->user['last_name'] ? $username : $lName);
+        $nationalCode = $this->user['national_code'] ?? '0000000000';
+        $placeholder_email = $this->user['email'] ?? ($username . '@placeholder.email'); // Generate a unique placeholder email
+
+        if (!$username || !$password) {
+            return false;
+        }
+
+        // Create a new user
+        $userId = wp_create_user($username, $nationalCode, $placeholder_email);
+
+        if (is_wp_error($userId)) {
+            // Handle errors (e.g., username already exists), perhaps return the error
+            return $userId;
+        }
+
+        wp_update_user([
+            'ID' => $userId,
+            'display_name' => $displayName,
+            'user_nicename' => $displayName
+        ]);
+
+//        update_user_meta($userId, 'first_name', $fName);
+//        update_user_meta($userId, 'last_name', $lName);
+//        update_user_meta($userId, 'national_code', $nationalCode);
+//        update_user_meta($userId, 'from_ewano', 1);
 
         return $userId;
+    }
+
+    private function getOrCreateUser () {
+        $user = get_user_by('login', $this->username);
+
+        // Check if the user exists
+        if (!$user) {
+            $userId = $this->register();
+            if (is_wp_error($userId)) {
+                return $userId;
+            }
+            $user = get_user_by('ID', $userId);
+        }
+        return $user;
     }
 }

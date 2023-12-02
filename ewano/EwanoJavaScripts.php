@@ -4,71 +4,79 @@ include_once('EwanoAssist.php');
 class EwanoJavaScripts {
     public function __construct(){
         $this->assist = new EwanoAssist();
-        if ($this->assist->isFromEwano()) {
-            add_action('wp_head', array($this, 'injectEwanoScript'));
-        }
+        $this->development = $this->assist->development;
+        $this->developmentResultStatus = true;
+        $this->script_url = 'https://static-ebcom.mci.ir/static/ewano/assets/ewano-web-toolkit-v1.min.js';
+        add_action('wp_head', function() {
+            $this->injectEwanoScript();
+        }, 8);
     }
 
     public function onWebAppReady () {
-        add_action('wp_footer', array($this, 'injectOnWebAppReadyScript'));
+        add_action('wp_footer', function() {
+            $this->injectOnWebAppReadyScript();
+        }, 11);
     }
 
-    public function login () {
-        add_action('wp_footer', array($this, 'injectLoginScript'));
+    public function ewanoPay ($amount, $ewanoOrderId) {
+        add_action('wp_footer', function() use ($amount, $ewanoOrderId) {
+            $this->injectPayScript($amount, $ewanoOrderId);
+        }, 12);
     }
 
-    public function ewanoPay () {
-        add_action('wp_footer', array($this, 'injectPayScript'));
-    }
-
-    public function ewanoPaymentResult () {
-        add_action('wp_footer', array($this, 'injectPaymentResultScript'));
+    public function overrideEwanoPaymentResultMethod ($callbackUrl) {
+        add_action('wp_footer', function() use ($callbackUrl) {
+            $this->injectPaymentResultScript($callbackUrl);
+        }, 9);
     }
 
     private function injectEwanoScript () {
-        $script_url = 'https://static-ebcom.mci.ir/static/ewano/assets/ewano-web-toolkit-v1.min.js';
-
-        if (isFromEwano()) {
-            echo '<script src="' . esc_url($script_url) . '"></script>';
+        if ($this->assist->isFromEwano() || $this->assist->hasEwanoFlag()) {
+            echo '<script src="' . esc_url($this->script_url) . '"></script>';
         }
     }
 
     private function injectOnWebAppReadyScript () {
         ?>
         <script>
-            APIGateway.ewano.login(uuid)
             window.ewano.onWebAppReady()
+            console.log('ewano.onWebAppReady');
+        </script>
+        <?php
+    }
+
+
+    private function injectPayScript ($amount, $ewanoOrderId) {
+        ?>
+        <script>
+            window.ewano.pay(<?php echo $amount; ?>, '<?php echo $ewanoOrderId; ?>');
+            console.log('ewano.pay -> $amount:', <?php echo $amount; ?>);
+            console.log('ewano.pay -> $ewanoOrderId:', <?php echo $ewanoOrderId; ?>);
+        </script>
+        <?php
+    }
+
+    private function injectPaymentResultScript ($callbackUrl) {
+        ?>
+        <script>
+            console.log('ewano.overrideEwanoPaymentResultMethod -> $callbackUrl:', '<?php echo $callbackUrl; ?>')
+            <?php
+                if ($this->development) {
+                    ?>
+                        console.log('ewano.paymentResult development -> status:', '<?php echo $this->developmentResultStatus ? '1' : '0'; ?>')
+                        let url = new URL('<?php echo $callbackUrl; ?>');
+                        url.searchParams.append('status', '<?php echo $this->developmentResultStatus ? '1' : '0'; ?>');
+                        window.location.href = url.toString();
+                    <?php
+                }
+            ?>
             window.ewano.paymentResult = (status) => {
-                const ewanoCustomEvent = new CustomEvent('ewano-payment-result', { detail: { status } });
-                window.document.dispatchEvent(ewanoCustomEvent);
-            }
-            window.ewano.pay(amount, orderId, callbackUrl)
-        </script>
-        <?php
-    }
-
-    private function injectLoginScript () {
-        ?>
-        <script>
-            APIGateway.ewano.login(uuid)
-        </script>
-        <?php
-    }
-
-    private function injectPayScript () {
-        ?>
-        <script>
-            window.ewano.pay(amount, orderId, callbackUrl)
-        </script>
-        <?php
-    }
-
-    private function injectPaymentResultScript () {
-        ?>
-        <script>
-            window.ewano.paymentResult = (status) => {
-                const ewanoCustomEvent = new CustomEvent('ewano-payment-result', { detail: { status } });
-                window.document.dispatchEvent(ewanoCustomEvent);
+                console.log('ewano.paymentResult -> status:', status)
+                let url = new URL('<?php echo $callbackUrl; ?>');
+                url.searchParams.append('status', status ? '1' : '0');
+                window.location.href = url.toString();
+                // const ewanoCustomEvent = new CustomEvent('ewano-payment-result', { detail: { status } });
+                // window.document.dispatchEvent(ewanoCustomEvent);
             }
         </script>
         <?php

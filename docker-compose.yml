@@ -2,22 +2,17 @@ version: '3'
 
 services:
   db:
-    # We use a mariadb image which supports both amd64 & arm64 architecture
-    image: mariadb:10.6.4-focal
-    # If you really want to use MySQL, uncomment the following line
-    #image: mysql:8.0.27
-    command: '--default-authentication-plugin=mysql_native_password'
+    image: mysql:8.2.0
     volumes:
       - db_data:/var/lib/mysql
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=password
       - MYSQL_DATABASE=wordpress
-      - MYSQL_USER=root
+      - MYSQL_USER=wordpress
       - MYSQL_PASSWORD=password
     expose:
       - 3306
-      - 33060
 
   wordpress:
     build:
@@ -26,11 +21,10 @@ services:
     volumes:
       - ./ewano:/var/www/html/wp-content/plugins/ewano
     ports:
-      - 8080:80
-    restart: always
+      - 8888:80
     environment:
       WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: password
       WORDPRESS_DB_NAME: wordpress
       WP_DEBUG: 'true'

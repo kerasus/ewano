@@ -1,4 +1,7 @@
 <?php
+
+if (!defined('ABSPATH') ) exit;
+
 /*
  Plugin Name: Ewano
  Plugin URI: https://your-plugin-uri.com/
@@ -8,29 +11,10 @@
  Author URI: https://your-website.com/
  */
 
-include_once('EwanoGateway.php');
-
-
-//add_action('init', 'initEwano');
-//add_action('wp_head', 'injectEwanoScript');
-//add_action('plugins_loaded', 'initEwanoGatewayClass');
-//    $userId = get_current_user_id(); // or replace with specific user ID
-//    $openOrders = getCurrentUserOpenOrders($userId);
-//
-
-//function initEwano () {
-////    if (!isFromEwano()) {
-////        return null;
-////    }
-//
-////    var_dump($openOrders);
-////    foreach($openOrders as $order) {
-////        var_dump('$order' . $order . '<br />');
-//////        echo 'Order ID: ' . $order->ID . '<br />';
-////    }
-//
-//
-////    if (isHomePage()) {
-////        EwanoAutoLogin('ewano2');
-////    }
-//}
+add_action('plugins_loaded', function () {
+    include_once('EwanoInit.php');
+    $ewanoInit = new EwanoInit();
+    $ewanoInit->prepareForIncomingUser()
+        ->prepareEwanoGateway()
+        ->onWebAppReady();
+}, 0);
