@@ -37,7 +37,7 @@ class EwanoInit {
     }
 
     public function prepareEwanoGateway () {
-        if ($this->assist->hasEwanoFlag()) {
+        if ($this->assist->hasEwanoFlag() || (is_admin() && current_user_can( 'manage_options' ))) {
             include_once('EwanoGateway.php');
         }
         return $this;

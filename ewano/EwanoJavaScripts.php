@@ -4,7 +4,8 @@ include_once('EwanoAssist.php');
 class EwanoJavaScripts {
     public function __construct(){
         $this->assist = new EwanoAssist();
-        $this->development = $this->assist->development;
+//        $this->development = $this->assist->development;
+        $this->development = true;
         $this->developmentResultStatus = true;
         $this->script_url = 'https://static-ebcom.mci.ir/static/ewano/assets/ewano-web-toolkit-v1.min.js';
         add_action('wp_head', function() {
@@ -66,6 +67,7 @@ class EwanoJavaScripts {
                         console.log('ewano.paymentResult development -> status:', '<?php echo $this->developmentResultStatus ? '1' : '0'; ?>')
                         let url = new URL('<?php echo $callbackUrl; ?>');
                         url.searchParams.append('status', '<?php echo $this->developmentResultStatus ? '1' : '0'; ?>');
+                        // console.log('url.toString()', url.toString())
                         window.location.href = url.toString();
                     <?php
                 }

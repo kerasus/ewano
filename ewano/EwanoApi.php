@@ -90,12 +90,13 @@ class EwanoApi {
 //        $sampleRsponse = [
 //            "third_party_order_id" => "3b3c91b3-8355-401d-b93d-c34160f2aa79",
 //            "client_order_id" => "1",
-//            "amount" => 6000000
+//            "total_amount" => 6000000
+//            "payable_amount" => 5000000
 //        ];
         return $data['data'];
     }
 
-    public function pay ($ewanoUserId)
+    public function pay ($ewanoOrderId)
     {
 //        $sampleData = [
 //            'msisdn' => $username, // Number
@@ -115,13 +116,13 @@ class EwanoApi {
 //        ];
 //        if ($this->development) {
 //            return [
-//                'id' => date('ymdHis'),
+//                'ref_id' => date('ymdHis'),
 //                'message' => 'success!',
 //                'status' => '1',
 //            ];
 //        }
-        $response = $this->sendPostRequest($this->apiAddresses['makeOrder'], [
-            'id' => $ewanoUserId
+        $response = $this->sendPostRequest($this->apiAddresses['pay'], [
+            'id' => $ewanoOrderId
         ]);
 
         // Error checking
@@ -132,7 +133,7 @@ class EwanoApi {
         // You can then use json_decode to convert JSON response to an array.
         $data = json_decode($response['body'], true);
 //        $sampleRsponse = [
-//            "id" => 2",
+//            "ref_id" => 2",
 //            "status" => "OK",
 //            "message" => "پرداخت موفقیت آمیز"
 //        ];

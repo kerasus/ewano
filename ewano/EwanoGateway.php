@@ -59,12 +59,9 @@ function Load_Ewano_Gateway() {
             $this->description = $this->settings['description'];
 
             $this->terminal = $this->settings['terminal'];
-            $this->username = $this->settings['username'];
-            $this->password = $this->settings['password'];
 
             $this->success_massage = $this->settings['success_massage'];
             $this->failed_massage = $this->settings['failed_massage'];
-            $this->cancelled_massage = $this->settings['cancelled_massage'];
 
             if ( version_compare( WOOCOMMERCE_VERSION, '2.0.0', '>=' ) )
                 add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -84,11 +81,6 @@ function Load_Ewano_Gateway() {
         public function init_form_fields(){
             $this->form_fields = apply_filters('WC_Ewano_Config',
                 array(
-                    'base_confing' => array(
-                        'title'       => __( 'تنظیمات پایه ای', 'woocommerce' ),
-                        'type'        => 'title',
-                        'description' => '',
-                    ),
                     'enabled' => array(
                         'title'   => __( 'فعالسازی/غیرفعالسازی', 'woocommerce' ),
                         'type'    => 'checkbox',
@@ -104,31 +96,12 @@ function Load_Ewano_Gateway() {
                         'default'     => __( 'ایوانو', 'woocommerce' ),
                         'desc_tip'    => true,
                     ),
-                    'username' => array(
-                        'title'       => __( 'نام کاربری', 'woocommerce' ),
-                        'type'        => 'text',
-                        'description' => __( 'نام کاربری درگاه بانک ملت', 'woocommerce' ),
-                        'default'     => '',
-                        'desc_tip'    => true
-                    ),
-                    'password' => array(
-                        'title'       => __( 'کلمه عبور', 'woocommerce' ),
-                        'type'        => 'text',
-                        'description' => __( 'کلمه عبور درگاه بانک ملت', 'woocommerce' ),
-                        'default'     => '',
-                        'desc_tip'    => true
-                    ),
                     'description' => array(
                         'title'       => __( 'توضیحات درگاه', 'woocommerce' ),
-                        'type'        => 'text',
+                        'type'        => 'textarea',
                         'desc_tip'    => true,
                         'description' => __( 'توضیحاتی که در طی عملیات پرداخت برای درگاه نمایش داده خواهد شد', 'woocommerce' ),
                         'default'     => __( 'پرداخت امن به وسیله کلیه کارت های عضو شتاب از طریق درگاه ایوانو', 'woocommerce' )
-                    ),
-                    'account_confing' => array(
-                        'title'       => __( 'تنظیمات حساب ایوانو', 'woocommerce' ),
-                        'type'        => 'title',
-                        'description' => '',
                     ),
                     'terminal' => array(
                         'title'       => __( 'ترمینال آیدی', 'woocommerce' ),
@@ -136,11 +109,6 @@ function Load_Ewano_Gateway() {
                         'description' => __( 'شماره ترمینال درگاه ایوانو', 'woocommerce' ),
                         'default'     => '',
                         'desc_tip'    => true
-                    ),
-                    'payment_confing' => array(
-                        'title'       => __( 'تنظیمات عملیات پرداخت', 'woocommerce' ),
-                        'type'        => 'title',
-                        'description' => '',
                     ),
                     'success_massage' => array(
                         'title'       => __( 'پیام پرداخت موفق', 'woocommerce' ),
@@ -154,11 +122,35 @@ function Load_Ewano_Gateway() {
                         'description' => __( 'متن پیامی که میخواهید بعد از پرداخت ناموفق به کاربر نمایش دهید را وارد نمایید . همچنین می توانید از شورت کد {fault} برای نمایش دلیل خطای رخ داده استفاده نمایید . این دلیل خطا از سایت ایوانو ارسال میگردد .', 'woocommerce' ),
                         'default'     => __( 'پرداخت شما ناموفق بوده است . لطفا مجددا تلاش نمایید یا در صورت بروز اشکال با مدیر سایت تماس بگیرید .', 'woocommerce' ),
                     ),
-                    'cancelled_massage' => array(
-                        'title'       => __( 'پیام انصراف از پرداخت', 'woocommerce' ),
+                    'make_order_failed_massage' => array(
+                        'title'       => __( 'پیام اشکال در ساخت سفارش سمت ایوانو', 'woocommerce' ),
                         'type'        => 'textarea',
-                        'description' => __( 'متن پیامی که میخواهید بعد از انصراف کاربر از پرداخت نمایش دهید را وارد نمایید . این پیام بعد از بازگشت از بانک نمایش داده خواهد شد .', 'woocommerce' ),
-                        'default'     => __( 'پرداخت به دلیل انصراف شما ناتمام باقی ماند .', 'woocommerce' ),
+                        'description' => __( 'این پیام زمانی نشان داده می شود که مشکلی در هنگام ارتباط با سرویس ایوانو جهت ساخت سفارش رخ می دهد.', 'woocommerce' ),
+                        'default'     => __( 'پرداخت با موفقیت انجام نشد. مشکلی در ساخت سفارش سمت ایوانو رخ داده است.', 'woocommerce' ),
+                    ),
+                    'make_order_invalid_amount_massage' => array(
+                        'title'       => __( 'پیام اشکال در بررسی صحت قیمت سفارش', 'woocommerce' ),
+                        'type'        => 'textarea',
+                        'description' => __( 'این پیام زمانی نشان داده می شود که قیمت محاسبه شده سمت ایوانو با قیمت نهایی سمت شما همخوانی ندارد.', 'woocommerce' ),
+                        'default'     => __( 'پرداخت با موفقیت انجام نشد. قیمت محاسبه شده سمت ایوانو صحیح نیست.', 'woocommerce' ),
+                    ),
+                    'make_order_invalid_order_id_massage' => array(
+                        'title'       => __( 'پیام اشکال در بررسی صحت کد سفارش', 'woocommerce' ),
+                        'type'        => 'textarea',
+                        'description' => __( 'این پیام زمانی نشان داده می شود که کد سفارش اعلام شده از سمت ایوانو با کد سفارش سمت شما همخوانی ندارد.', 'woocommerce' ),
+                        'default'     => __( 'پرداخت با موفقیت انجام نشد. کد سفارش اعلام شده از سمت ایوانو صحیح نیست.', 'woocommerce' ),
+                    ),
+                    'ewano_result_failed_request_massage' => array(
+                        'title'       => __( 'پیام اشکال در ارسال اطلاعات به سرویس ایوانو', 'woocommerce' ),
+                        'type'        => 'textarea',
+                        'description' => __( 'این پیام زمانی نشان داده می شود که مشکلی در ارسال اطلاعات جهت نهایی کردن پرداخت رخ داده است.', 'woocommerce' ),
+                        'default'     => __( 'پرداخت با موفقیت انجام نشد. فرایند پرداخت سمت سرویس ایوانو با مشکلی مواجه شده است.', 'woocommerce' ),
+                    ),
+                    'ewano_result_invalid_ref_id_massage' => array(
+                        'title'       => __( 'پیام اشکال در بررسی صحت کد رهگیری', 'woocommerce' ),
+                        'type'        => 'textarea',
+                        'description' => __( 'این پیام زمانی نشان داده می شود که کد رهگیری که در آدرس کاربر هنگام برگشت از درگاه به همراه دارد با کد رهگیری استعلام شده از سرویس ایوانو همخوانی ندارد.', 'woocommerce' ),
+                        'default'     => __( 'کد رهگیری سرویس ایوانو معتبر نیست.', 'woocommerce' ),
                     ),
                 )
             );
@@ -176,30 +168,62 @@ function Load_Ewano_Gateway() {
             global $woocommerce;
             $woocommerce->session->order_id_bankmellat = $orderId;
             $orderDataForGateway = $this->getOrderDataForGateway($orderId);
-            $amount = $orderDataForGateway['amount'];
+            $payableAmount = $orderDataForGateway['amount'];
 
             $data = $this->getDataForMakeOrderRequest($orderId);
             // call alaa api to create ewano order and get
             $response = $this->api->makeOrder($data);
             if ($response === null) {
-                wc_add_notice(__('پرداخت با موفقیت انجام نشد. مشکلی در ساخت سفارش سمت ایوانو رخ داده است.', 'woocommerce' ) , 'error' );
+                wc_add_notice($this->settings['make_order_failed_massage'] , 'error' );
                 wp_redirect( $this->checkout_url );
                 exit;
             }
-            $refCode = $response['client_order_id'];
+            $refCode = $response['ref_id'];
+            $wcOrderIdFromService = $response['client_order_id'];
             $ewanoOrderId = $response['third_party_order_id'];
+//            $totalAmountFromService = $response['total_amount'];
+            $payableAmountFromService = $response['payable_amount'];
+            if ((int)$payableAmountFromService !== (int)$payableAmount) {
+                wc_add_notice($this->settings['make_order_invalid_amount_massage'] , 'error' );
+                wp_redirect( $this->checkout_url );
+                exit;
+            }
+            if ((int)$wcOrderIdFromService !== (int)$orderId) {
+                wc_add_notice($this->settings['make_order_invalid_order_id_massage'] , 'error' );
+                wp_redirect( $this->checkout_url );
+                exit;
+            }
             $callBackUrl = add_query_arg( array(
                 'ref_code' => $refCode,
                 'wc_order' => $orderId,
                 'ewano_order' => $ewanoOrderId
             ), WC()->api_request_url('WC_Ewano'));
             $this->javaScripts->overrideEwanoPaymentResultMethod($callBackUrl);
-            $this->javaScripts->ewanoPay($amount, $ewanoOrderId);
+            $this->javaScripts->ewanoPay($payableAmount, $ewanoOrderId);
+        }
+
+        private function checkAndShowProperErrorForQueryParamsInReturnFromEwanoGateway () {
+            $keys = [
+                'ref_code',
+                'wc_order',
+                'ewano_order',
+                'status',
+            ];
+            $status = true;
+
+            foreach ($keys as $key) {
+                if (!isset($_GET[$key])) {
+                    $this->failedPayment('پرداخت با موفقیت انجام نشد. پارامتر ' . $key . ' به درستی مشخص نشده است.');
+                    $status = false;
+                }
+            }
+
+            return $status;
         }
 
         public function showReturnFromEwanoGatewayTemplate () {
-            if (!isset($_GET['ref_id']) || !isset($_GET['wc_order']) || !isset($_GET['ewano_order']) || !isset($_GET['status'])) {
-                $this->failedPayment();
+            $queryParamStatus = $this->checkAndShowProperErrorForQueryParamsInReturnFromEwanoGateway();
+            if (!$queryParamStatus) {
                 exit;
             }
 
@@ -209,13 +233,13 @@ function Load_Ewano_Gateway() {
             $status = $_GET['status'];
 
             if ($status !== '1') {
-                $this->failedPayment();
+                $this->failedPayment($this->failed_massage);
                 exit;
             }
 
             $order = new WC_Order($wcOrderId);
 
-            if($order->status === 'completed') {
+            if($order->get_status() === 'completed') {
                 $Notice = wpautop( wptexturize($this->success_massage));
                 wc_add_notice( $Notice , 'success' );
                 wp_redirect( add_query_arg( 'wc_status', 'success', $this->get_return_url( $order ) ) );
@@ -223,15 +247,21 @@ function Load_Ewano_Gateway() {
             }
 
             $response = $this->api->pay($ewanoOrderId);
-            if ($response === null || $response['status'] !== 'OK') {
-                $this->failedPayment($response['message']);
+            if ($response === null) {
+                $this->failedPayment($this->settings['ewano_result_failed_request_massage']);
+                wp_redirect( $this->checkout_url );
+                exit;
+            }
+            if ($response['status'] !== 'OK') {
+//                $message = $response['message'] ?? 'پرداخت با موفقیت انجام نشد. فرایند پرداخت سمت سرویس ایوانو با موفقیت انجام نشد.';
+                $this->failedPayment($this->failed_massage);
                 wp_redirect( $this->checkout_url );
                 exit;
             }
 
-            $refCodeFromPayService = $response['id'];
-            if ($refCodeFromPayService !== $refCodeFromUrl) {
-                $this->failedPayment('کد رهگیری سرویس ایوانو معتبر نیست.');
+            $refCodeFromPayService = $response['ref_id'];
+            if ((int)$refCodeFromPayService !== (int)$refCodeFromUrl) {
+                $this->failedPayment($this->settings['ewano_result_invalid_ref_id_massage']);
                 wp_redirect( $this->checkout_url );
                 exit;
             }
